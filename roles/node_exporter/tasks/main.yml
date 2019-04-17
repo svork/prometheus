@@ -1,0 +1,65 @@
+---
+# tasks file for roles/node_exporter
+- name: Create prometheus user
+  user:
+    name: prometheus
+    state: present
+    create_home: no
+    shell: /sbin/nologin
+  tags: node_exporter
+
+- name: Create directory
+  file:
+    name: "{{ node_exporter_directory }}"
+    state: directory
+    mode: 0755
+    owner: prometheus
+    group: prometheus
+  tags: node_exporter
+
+- name: Download Node exporter from GitHub
+  get_url: 
+    url: "{{ node_exporter_github_url }}"
+    dest: "{{ node_exporter_archive_directory }}"
+    checksum: "{{ node_exporter_sha256sum }}"
+  tags: node_exporter
+
+- name: Extract Node exporter from archive
+  unarchive:
+    src: "{{ node_exporter_archive_directory }}/node_exporter-0.17.0.linux-amd64.tar.gz"
+    dest: "{{ node_exporter_archive_directory }}"
+    remote_src: yes
+  tags: node_exporter
+
+- name: Verify if Node exporter binary exists
+  stat:
+    path: "{{ node_exporter_directory }}/node_exporter"
+  register: st
+  tags: node_exporter
+
+- name: Move archive directory data to node exporter directory
+  shell: '/bin/mv "{{ node_exporter_archive_directory }}"/node_exporter-0.17.0.linux-amd64/* "{{ node_exporter_directory }}"'
+  when: st.stat.exists == False
+  tags: node_exporter
+
+- name: Install Node exporter as a service
+  template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+  tags: node_exporter
+
+- name: Allow Node exporter through firewall
+  firewalld:
+    port: 9100/tcp
+    permanent: yes
+    state: enabled
+  tags: node_exporter
+
+- name: Start node_exporter at boot time
+  systemd: 
+    name: node_exporter.service
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags: node_exporter
+...
