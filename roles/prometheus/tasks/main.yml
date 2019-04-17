@@ -70,6 +70,7 @@
   firewalld:
     port: 9090/tcp
     permanent: yes
+    immediate: yes
     state: enabled
   tags: prometheus
 ...
