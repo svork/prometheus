@@ -1,0 +1,18 @@
+[Unit]
+Description=Prometheus server
+Documentation=https://prometheus.io/docs/introduction/overview
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart={{ prometheus_directory }}/prometheus \
+  --config.file={{ prometheus_directory }}/prometheus.yml \
+  --storage.tsdb.path={{ prometheus_directory }}/data \
+  --web.console.templates={{ prometheus_directory }}/consoles \
+  --web.console.libraries={{ prometheus_directory }}/console_libraries
+
+[Install]
+WantedBy=multi-user.target
