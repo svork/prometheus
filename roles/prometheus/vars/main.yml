@@ -1,0 +1,8 @@
+---
+# vars file for roles/prometheus
+prometheus_server: 192.168.56.8
+prometheus_directory: /usr/local/bin/prometheus
+prometheus_archive_directory: /usr/local/bin
+prometheus_github_url: https://github.com/prometheus/prometheus/releases/download/v2.9.0/prometheus-2.9.0.linux-amd64.tar.gz
+prometheus_sha256sum: sha256:67a8c878167848e6cc8fd69b8f19fb1dd664a2f40f8a0f0909e40c6a3ef230e5
+...
