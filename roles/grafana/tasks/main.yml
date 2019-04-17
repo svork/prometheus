@@ -1,0 +1,45 @@
+---
+# tasks file for roles/grafana
+- name: Install Grafana repository
+  yum_repository:
+    name: grafana
+    description: The leading open source software for time series analytics
+    baseurl: https://packages.grafana.com/oss/rpm
+    repo_gpgcheck: yes
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://packages.grafana.com/gpg.key
+    sslverify: yes
+    sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+    state: present
+  tags: grafana
+
+- name: Install Grafana
+  yum:
+    name: grafana
+    state: latest
+    update_cache: yes
+  tags: grafana
+
+- name: Deploy configuration file
+  template:
+    src: grafana.ini.j2
+    dest: /etc/grafana/grafana.ini
+  notify: "Restart Grafana"
+  tags: grafana
+
+- name: Start Grafana at boot time
+  systemd:
+    name: grafana-server.service
+    state: started
+    enabled: yes
+  tags: grafana
+
+- name: Allow Grafana through firewall
+  firewalld:
+    port: 3000/tcp
+    permanent: yes
+    immediate: yes
+    state: enabled
+  tags: grafana
+...
