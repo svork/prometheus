@@ -1,0 +1,75 @@
+---
+# tasks file for roles/prometheus
+- name: Create Prometheus user
+  user:
+    name: prometheus
+    state: present
+    create_home: no
+    shell: /sbin/nologin
+  tags: prometheus
+
+- name: Create directories
+  file:
+    name: "{{ prometheus_directory }}"
+    state: directory
+    mode: 0755
+    owner: prometheus
+    group: prometheus
+  tags: prometheus
+
+- name: Download Prometheus from GitHub
+  get_url: 
+    url: "{{ prometheus_github_url }}"
+    dest: "{{ prometheus_archive_directory }}"
+    checksum: "{{ prometheus_sha256sum }}"
+  tags: prometheus_test
+
+- name: Extract Prometheus from archive
+  unarchive:
+    src: "{{ prometheus_archive_directory }}/prometheus-2.9.0.linux-amd64.tar.gz"
+    dest: "{{ prometheus_archive_directory }}"
+    remote_src: yes
+  tags: prometheus
+
+- name: Verify if Prometheus binary exists
+  stat:
+    path: "{{ prometheus_directory }}/prometheus"
+  register: st
+  tags: prometheus
+
+- name: Rename archive directory
+  shell: '/bin/mv "{{ prometheus_archive_directory }}"/prometheus-2.9.0.linux-amd64/* "{{ prometheus_directory }}"'
+  when: st.stat.exists == False
+  tags: prometheus
+
+- name: Install configuration file
+  template:
+    src: prometheus.yml.j2
+    dest: "{{ prometheus_directory }}/prometheus.yml"
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  notify: "Restart Prometheus"
+  tags: prometheus
+
+- name: Install Prometheus as a service
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+  tags: prometheus
+
+- name: Start prometheus at boot time
+  systemd: 
+    name: prometheus.service
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags: prometheus
+
+- name: Allow Prometheus through firewall
+  firewalld:
+    port: 9090/tcp
+    permanent: yes
+    state: enabled
+  tags: prometheus
+...
