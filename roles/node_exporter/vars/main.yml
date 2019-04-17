@@ -1,0 +1,8 @@
+---
+# vars file for roles/node_exporter
+prometheus_server: 192.168.56.8
+node_exporter_directory: /usr/local/bin/node_exporter
+node_exporter_archive_directory: /usr/local/bin
+node_exporter_github_url: https://github.com/prometheus/node_exporter/releases/download/v0.17.0/node_exporter-0.17.0.linux-amd64.tar.gz
+node_exporter_sha256sum: sha256:d2e00d805dbfdc67e7291ce2d2ff151f758dd7401dd993411ff3818d0e231489
+...
