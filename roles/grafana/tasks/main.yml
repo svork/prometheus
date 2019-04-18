@@ -21,10 +21,10 @@
     update_cache: yes
   tags: grafana
 
-- name: Deploy configuration file
+- name: Deploy datasource file
   template:
-    src: grafana.ini.j2
-    dest: /etc/grafana/grafana.ini
+    src: prometheus.yml.j2
+    dest: /etc/grafana/provisioning/datasources/prometheus.yml
   notify: "Restart Grafana"
   tags: grafana
 
