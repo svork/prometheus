@@ -22,7 +22,7 @@
     url: "{{ prometheus_github_url }}"
     dest: "{{ prometheus_archive_directory }}"
     checksum: "{{ prometheus_sha256sum }}"
-  tags: prometheus_test
+  tags: prometheus
 
 - name: Extract Prometheus from archive
   unarchive:
