@@ -1,0 +1,76 @@
+---
+# tasks file for roles/alertmanager
+- name: Create prometheus user
+  user:
+    name: prometheus
+    state: present
+    create_home: no
+    shell: /sbin/nologin
+  tags: alertmanager
+
+- name: Create directory
+  file:
+    name: "{{ alertmanager_directory }}"
+    state: directory
+    mode: 0755
+    owner: prometheus
+    group: prometheus
+  tags: alertmanager
+
+- name: Download Alert manager from GitHub
+  get_url: 
+    url: "{{ alertmanager_github_url }}"
+    dest: "{{ alertmanager_archive_directory }}"
+    checksum: "{{ alertmanager_sha256sum }}"
+  tags: alertmanager
+
+- name: Extract Alert manager from archive
+  unarchive:
+    src: "{{ alertmanager_archive_directory }}/alertmanager-0.16.2.linux-amd64.tar.gz"
+    dest: "{{ alertmanager_archive_directory }}"
+    remote_src: yes
+  tags: alertmanager
+
+- name: Verify if Alert manager binary exists
+  stat:
+    path: "{{ alertmanager_directory }}/alertmanager"
+  register: st
+  tags: alertmanager
+
+- name: Move archive directory data to node exporter directory
+  shell: '/bin/mv "{{ alertmanager_archive_directory }}"/alertmanager-0.16.2.linux-amd64/* "{{ alertmanager_directory }}"'
+  when: st.stat.exists == False
+  tags: alertmanager
+
+- name: Install Alert manager as a service
+  template:
+    src: alertmanager.service.j2
+    dest: /etc/systemd/system/alertmanager.service
+  tags: alertmanager
+
+- name: Install configuration file
+  template:
+    src: alertmanager.yml.j2
+    dest: "{{ alertmanager_directory }}/alertmanager.yml"
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  notify: "Restart Alertmanager"
+  tags: alertmanager
+
+- name: Allow Alert manager through firewall
+  firewalld:
+    port: 9093/tcp
+    permanent: yes
+    immediate: yes
+    state: enabled
+  tags: alertmanager
+
+- name: Start alertmanager at boot time
+  systemd: 
+    name: alertmanager.service
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags: alertmanager
+...
