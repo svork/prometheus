@@ -5,6 +5,7 @@
 
   roles:
   - prometheus
+  - alertmanager
   - node_exporter
   - grafana
 ...
