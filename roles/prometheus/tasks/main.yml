@@ -52,6 +52,15 @@
   notify: "Restart Prometheus"
   tags: prometheus
 
+- name: Install rules file
+  copy:
+    src: alerts.yml
+    dest: "{{ prometheus_directory }}"
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  tags: prometheus
+
 - name: Install Prometheus as a service
   template:
     src: prometheus.service.j2
