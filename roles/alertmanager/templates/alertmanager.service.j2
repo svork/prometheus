@@ -10,7 +10,7 @@ Group=prometheus
 Type=simple
 ExecStart={{ alertmanager_directory }}/alertmanager \
   --config.file={{ alertmanager_directory }}/alertmanager.yml \
-  --storage.tsdb.path={{ alertmanager_directory }}/data 
+  --storage.path={{ alertmanager_directory }}
 
 [Install]
 WantedBy=multi-user.target
