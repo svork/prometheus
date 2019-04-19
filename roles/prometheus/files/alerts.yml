@@ -1,0 +1,15 @@
+---
+# This is a simple alert rules file for Prometheus
+# Run 'promtool check rules alerts.yml' to check its syntax
+groups:
+- name: My first alert
+  rules:
+  - alert: FileSystemNotFull
+    expr: node_filesystem_files_free{device="rootfs",fstype="rootfs",instance="192.168.56.8:9100",job="node",mountpoint="/"} > 5000000
+    for: 2m
+    labels:
+      severity: page
+    annotations:
+      summary: File system NOT full
+      description: The file system is NOT full. Good job!
+...
